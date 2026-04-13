@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const SIZE = 234;
+const SIZE = 160;
 
 export default function LogoLLA() {
   const [error, setError] = useState(false);

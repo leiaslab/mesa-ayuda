@@ -68,42 +68,45 @@ const steps = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white font-sans">
-      {/* ── NAVBAR ── */}
-      <nav
-        className="sticky top-0 z-50 px-4 py-4 flex items-center justify-between shadow-lg"
+      {/* ── HEADER ── */}
+      <header
+        className="px-6 pt-6 pb-10 md:px-12 md:pt-8 md:pb-14"
         style={{ backgroundColor: "#32105B" }}
       >
-        <div className="flex items-center gap-4 min-w-0">
+        {/* fila superior: logo + botón */}
+        <div className="flex items-start justify-between">
           <LogoLLA />
-          <div className="min-w-0">
-            <p className="text-white font-extrabold text-xl leading-tight tracking-tight">
-              Cristian Frattini
-            </p>
-            <p
-              className="text-sm leading-snug font-semibold mt-0.5"
-              style={{ color: "rgba(255,255,255,0.75)" }}
-            >
-              Bloque La Libertad Avanza Avellaneda
-            </p>
-            <p
-              className="text-xs leading-tight mt-0.5"
-              style={{ color: "rgba(255,255,255,0.45)" }}
-            >
-              Coordinador local
-            </p>
-          </div>
+          <Link
+            href="/consulta"
+            className="text-white font-medium px-6 py-3 rounded-2xl transition-colors text-sm mt-2"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.2)",
+            }}
+          >
+            Consultar
+          </Link>
         </div>
-        <Link
-          href="/consulta"
-          className="text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors flex-shrink-0 ml-3"
-          style={{
-            backgroundColor: "rgba(255,255,255,0.12)",
-            border: "1px solid rgba(255,255,255,0.2)",
-          }}
-        >
-          Consultar
-        </Link>
-      </nav>
+
+        {/* nombre e info debajo del logo */}
+        <div className="mt-6">
+          <h1 className="text-white font-extrabold text-3xl md:text-4xl leading-tight tracking-tight">
+            Cristian Frattini
+          </h1>
+          <p
+            className="text-base font-semibold mt-1"
+            style={{ color: "rgba(255,255,255,0.75)" }}
+          >
+            Bloque La Libertad Avanza Avellaneda
+          </p>
+          <p
+            className="text-sm mt-0.5"
+            style={{ color: "rgba(255,255,255,0.45)" }}
+          >
+            Coordinador local
+          </p>
+        </div>
+      </header>
 
       {/* ── HERO ── */}
       <section
