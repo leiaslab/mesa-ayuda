@@ -89,19 +89,19 @@ export default function Home() {
         </div>
 
         {/* nombre e info debajo del logo */}
-        <div className="mt-6">
-          <h1 className="text-white font-extrabold text-3xl md:text-4xl leading-tight tracking-tight">
+        <div className="mt-5">
+          <h1 className="text-white font-bold text-xl leading-tight tracking-tight">
             Cristian Frattini
           </h1>
           <p
-            className="text-base font-semibold mt-1"
-            style={{ color: "rgba(255,255,255,0.75)" }}
+            className="text-sm font-medium mt-0.5"
+            style={{ color: "rgba(255,255,255,0.7)" }}
           >
             Bloque La Libertad Avanza Avellaneda
           </p>
           <p
-            className="text-sm mt-0.5"
-            style={{ color: "rgba(255,255,255,0.45)" }}
+            className="text-xs mt-0.5"
+            style={{ color: "rgba(255,255,255,0.4)" }}
           >
             Coordinador local
           </p>

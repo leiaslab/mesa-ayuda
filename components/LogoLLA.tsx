@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-const SIZE = 220;
-
 export default function LogoLLA() {
   const [error, setError] = useState(false);
 
@@ -11,18 +9,18 @@ export default function LogoLLA() {
     return (
       <div
         style={{
-          width: SIZE,
-          height: SIZE,
-          minWidth: SIZE,
+          height: 64,
+          width: 120,
+          borderRadius: 12,
           background: "linear-gradient(135deg, #6011E8 0%, #32105B 100%)",
           color: "#fff",
           border: "2px solid rgba(255,255,255,0.3)",
-          borderRadius: 16,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontWeight: 900,
-          fontSize: 18,
+          fontSize: 16,
+          flexShrink: 0,
         }}
       >
         LLA
@@ -35,13 +33,11 @@ export default function LogoLLA() {
       src="/logo-lla.png"
       alt="La Libertad Avanza"
       style={{
-        width: SIZE,
-        height: SIZE,
-        minWidth: SIZE,
+        height: 80,
+        width: "auto",
         objectFit: "contain",
         flexShrink: 0,
       }}
-      onError={() => setError(true)}
     />
   );
 }
