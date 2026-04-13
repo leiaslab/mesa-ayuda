@@ -33,7 +33,7 @@ export default function LogoLLA() {
       src="/logo-lla.png"
       alt="La Libertad Avanza"
       style={{
-        height: 80,
+        height: 110,
         width: "auto",
         objectFit: "contain",
         flexShrink: 0,
