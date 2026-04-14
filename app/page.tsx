@@ -65,11 +65,6 @@ const steps = [
   },
 ];
 
-const stats = [
-  { val: "+2.400", label: "Reclamos" },
-  { val: "94%", label: "Resueltos" },
-  { val: "48hs", label: "Respuesta" },
-];
 
 export default function Home() {
   return (
@@ -175,25 +170,6 @@ export default function Home() {
         </a>
       </div>
 
-      <section className="bg-[#2A0D4E] px-4 pb-8">
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-2 pt-0">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-2xl px-2 py-4 text-center"
-              style={{
-                backgroundColor: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
-            >
-              <p className="text-xl font-bold leading-none text-white">
-                {stat.val}
-              </p>
-              <p className="mt-1.5 text-xs text-white/50">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <section className="bg-gray-50 px-4 py-10">
         <div className="mx-auto max-w-md">
