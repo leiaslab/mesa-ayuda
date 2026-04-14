@@ -24,10 +24,10 @@ type Props = {
 export default function Sidebar({ nombre, email, rol }: Props) {
   const pathname  = usePathname();
   const router    = useRouter();
-  const supabase  = createClient();
   const [open, setOpen] = useState(false);
 
   const handleLogout = async () => {
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();

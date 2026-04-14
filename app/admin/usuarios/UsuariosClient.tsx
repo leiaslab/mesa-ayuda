@@ -12,7 +12,6 @@ type Props = {
 
 export default function UsuariosClient({ usuarios, currentUserId }: Props) {
   const router   = useRouter();
-  const supabase = createClient();
 
   const [showModal, setShowModal]   = useState(false);
   const [nombre,    setNombre]      = useState("");
@@ -48,11 +47,13 @@ export default function UsuariosClient({ usuarios, currentUserId }: Props) {
   };
 
   const handleToggleActivo = async (id: string, activo: boolean) => {
+    const supabase = createClient();
     await supabase.from("users").update({ activo: !activo }).eq("id", id);
     router.refresh();
   };
 
   const handleChangeRol = async (id: string, newRol: UserRol) => {
+    const supabase = createClient();
     await supabase.from("users").update({ rol: newRol }).eq("id", id);
     router.refresh();
   };

@@ -8,8 +8,6 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import type { ReclamoCompleto } from "@/types/database";
 
 export default function ConsultaPage() {
-  const supabase = createClient();
-
   const [numero,   setNumero]   = useState("");
   const [dni,      setDni]      = useState("");
   const [loading,  setLoading]  = useState(false);
@@ -21,6 +19,8 @@ export default function ConsultaPage() {
     setLoading(true);
     setError(null);
     setReclamo(null);
+
+    const supabase = createClient();
 
     const { data, error: supaError } = await supabase
       .from("reclamos_completos")

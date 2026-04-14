@@ -29,7 +29,6 @@ export default function ReclamoDetailClient({
   userId,
 }: Props) {
   const router   = useRouter();
-  const supabase = createClient();
 
   const [estado,    setEstado]    = useState<ReclamoEstado>(estadoActual);
   const [prioridad, setPrioridad] = useState<ReclamoPrioridad>(prioridadActual);
@@ -43,6 +42,7 @@ export default function ReclamoDetailClient({
     setLoading(true);
     setError(null);
 
+    const supabase = createClient();
     const { error } = await supabase
       .from("reclamos")
       .update({
@@ -67,6 +67,7 @@ export default function ReclamoDetailClient({
   const handleGenerarPDF = async () => {
     setGenLoading(true);
     try {
+      const supabase = createClient();
       await generarPDF(reclamoId, numeroSeguimiento, supabase, userId);
       router.refresh();
     } catch (e) {
