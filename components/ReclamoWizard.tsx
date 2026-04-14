@@ -9,6 +9,8 @@ type ReclamoData = {
   subcategoria: string;
   nombre: string;
   dni: string;
+  telefono: string;
+  email: string;
   direccion: string;
   entreCalles: string;
   barrio: string;
@@ -169,6 +171,8 @@ export default function ReclamoWizard({ categoria, onClose }: ReclamoWizardProps
     subcategoria: "",
     nombre: "",
     dni: "",
+    telefono: "",
+    email: "",
     direccion: "",
     entreCalles: "",
     barrio: "",
@@ -194,6 +198,14 @@ export default function ReclamoWizard({ categoria, onClose }: ReclamoWizardProps
         e.dni = "El DNI es requerido";
       } else if (!/^\d{6,8}$/.test(data.dni.replace(/\s|\./g, ""))) {
         e.dni = "Ingresá un DNI válido";
+      }
+      if (!data.telefono.trim()) {
+        e.telefono = "El teléfono es requerido";
+      } else if (data.telefono.replace(/\s|-/g, "").length < 8) {
+        e.telefono = "Ingresá un teléfono válido (mínimo 8 dígitos)";
+      }
+      if (data.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+        e.email = "Ingresá un email válido";
       }
       if (!data.direccion.trim()) e.direccion = "La dirección es requerida";
       if (!data.barrio.trim()) e.barrio = "El barrio es requerido";
@@ -366,6 +378,33 @@ export default function ReclamoWizard({ categoria, onClose }: ReclamoWizardProps
                 className={inputCls(!!errors.dni)} />
             </Field>
 
+            <Field label="Teléfono *" error={errors.telefono}>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400 select-none">
+                  🇦🇷
+                </span>
+                <input
+                  type="tel"
+                  placeholder="1123456789"
+                  value={data.telefono}
+                  maxLength={15}
+                  onChange={(e) => update("telefono", e.target.value.replace(/[^\d\s-]/g, ""))}
+                  className={`${inputCls(!!errors.telefono)} pl-10`}
+                />
+              </div>
+              <p className="text-[0.65rem] text-gray-300">Se usará para contactarte por WhatsApp</p>
+            </Field>
+
+            <Field label="Email" error={errors.email}>
+              <input
+                type="email"
+                placeholder="ejemplo@correo.com"
+                value={data.email}
+                onChange={(e) => update("email", e.target.value)}
+                className={inputCls(!!errors.email)}
+              />
+            </Field>
+
             <Field label="Dirección y altura *" error={errors.direccion}>
               <input type="text" placeholder="Av. Mitre 1234" value={data.direccion}
                 onChange={(e) => update("direccion", e.target.value)}
@@ -462,6 +501,8 @@ export default function ReclamoWizard({ categoria, onClose }: ReclamoWizardProps
               <ResumenRow label="Subcategoría" value={data.subcategoria} />
               <ResumenRow label="Nombre"       value={data.nombre} />
               <ResumenRow label="DNI"          value={data.dni} />
+              <ResumenRow label="Teléfono"     value={data.telefono} />
+              <ResumenRow label="Email"        value={data.email} />
               <ResumenRow label="Dirección"    value={data.direccion} />
               <ResumenRow label="Entre calles" value={data.entreCalles} />
               <ResumenRow label="Barrio"       value={data.barrio} />
