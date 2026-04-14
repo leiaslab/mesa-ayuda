@@ -1,43 +1,22 @@
-"use client";
+import Image from "next/image";
+import logoLLA from "../public/logo-lla-cropped.png";
 
-import { useState } from "react";
+type LogoLLAProps = {
+  className?: string;
+  priority?: boolean;
+};
 
-export default function LogoLLA() {
-  const [error, setError] = useState(false);
-
-  if (error) {
-    return (
-      <div
-        style={{
-          height: 64,
-          width: 120,
-          borderRadius: 12,
-          background: "linear-gradient(135deg, #6011E8 0%, #32105B 100%)",
-          color: "#fff",
-          border: "2px solid rgba(255,255,255,0.3)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: 900,
-          fontSize: 16,
-          flexShrink: 0,
-        }}
-      >
-        LLA
-      </div>
-    );
-  }
-
+export default function LogoLLA({
+  className,
+  priority = false,
+}: LogoLLAProps) {
   return (
-    <img
-      src="/logo-lla.png"
+    <Image
+      src={logoLLA}
       alt="La Libertad Avanza"
-      style={{
-        height: 110,
-        width: "auto",
-        objectFit: "contain",
-        flexShrink: 0,
-      }}
+      priority={priority}
+      className={className}
+      sizes="(min-width: 1024px) 208px, (min-width: 768px) 206px, 178px"
     />
   );
 }
