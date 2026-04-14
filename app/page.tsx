@@ -1,51 +1,6 @@
 import Link from "next/link";
 import LogoLLA from "@/components/LogoLLA";
-
-const categories = [
-  {
-    icon: "🛣️",
-    label: "Calles",
-    desc: "Baches, cordones, veredas",
-    href: "/reclamo?cat=calles",
-  },
-  {
-    icon: "💡",
-    label: "Alumbrado",
-    desc: "Postes y luminarias",
-    href: "/reclamo?cat=alumbrado",
-  },
-  {
-    icon: "💧",
-    label: "Aguas",
-    desc: "Pérdidas y cloacas",
-    href: "/reclamo?cat=aguas",
-  },
-  {
-    icon: "🗑️",
-    label: "Basura",
-    desc: "Recolección y contenedores",
-    href: "/reclamo?cat=basura",
-  },
-  {
-    icon: "🌊",
-    label: "Inundación",
-    desc: "Anegamientos y desagüe",
-    href: "/reclamo?cat=inundacion",
-  },
-  {
-    icon: "🔒",
-    label: "Inseguridad",
-    desc: "Iluminación y espacios",
-    href: "/reclamo?cat=inseguridad",
-  },
-  {
-    icon: "📋",
-    label: "Otros",
-    desc: "Otros reclamos vecinales",
-    href: "/reclamo?cat=otros",
-    wide: true,
-  },
-];
+import CategoriasSection from "@/components/CategoriasSection";
 
 const steps = [
   {
@@ -241,41 +196,7 @@ export default function Home() {
       </div>
 
 
-      <section className="bg-gray-50 px-4 py-10">
-        <div className="mx-auto max-w-md">
-          <h2 className="mb-1 text-xl font-bold text-[#32105B]">
-            ¿Qué necesitás reportar?
-          </h2>
-          <p className="mb-6 text-sm text-gray-400">
-            Seleccioná la categoría de tu reclamo
-          </p>
-
-          <div className="grid grid-cols-2 gap-3">
-            {categories.map((cat) => (
-              <Link
-                key={cat.label}
-                href={cat.href}
-                className={`rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md active:scale-95 ${
-                  cat.wide ? "col-span-2 flex flex-row items-center gap-3" : "flex flex-col gap-3"
-                }`}
-                style={{
-                  border: "1px solid #F0EBF8",
-                }}
-              >
-                <span className="text-3xl">{cat.icon}</span>
-                <div>
-                  <p className="text-sm font-semibold leading-tight text-[#32105B]">
-                    {cat.label}
-                  </p>
-                  <p className="mt-0.5 text-xs leading-snug text-gray-400">
-                    {cat.desc}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CategoriasSection />
 
       <section className="bg-white px-4 py-10">
         <div className="mx-auto max-w-md">
