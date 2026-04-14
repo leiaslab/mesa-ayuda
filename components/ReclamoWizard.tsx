@@ -162,6 +162,9 @@ interface ReclamoWizardProps {
 export default function ReclamoWizard({ categoria, onClose }: ReclamoWizardProps) {
   const [step, setStep] = useState<Step>(1);
   const [submitted, setSubmitted] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [numeroSeguimiento, setNumeroSeguimiento] = useState<string | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -235,10 +238,62 @@ export default function ReclamoWizard({ categoria, onClose }: ReclamoWizardProps
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = () => {
-    console.log("✅ Reclamo enviado:", data);
-    // TODO: conectar con Supabase
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    setSubmitLoading(true);
+    setSubmitError(null);
+
+    try {
+      // Convertir foto a base64 si existe
+      let foto_base64: string | null = null;
+      let foto_mime:   string | null = null;
+
+      if (data.foto) {
+        foto_mime = data.foto.type;
+        foto_base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload  = (e) => {
+            const result = e.target?.result as string;
+            // Quitar prefijo "data:image/...;base64,"
+            resolve(result.split(",")[1]);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(data.foto!);
+        });
+      }
+
+      const res = await fetch("/api/reclamos", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          nombre:       data.nombre,
+          dni:          data.dni,
+          telefono:     data.telefono,
+          email:        data.email || null,
+          direccion:    data.direccion,
+          entre_calles: data.entreCalles || null,
+          barrio:       data.barrio,
+          categoria:    data.categoria,
+          subcategoria: data.subcategoria,
+          descripcion:  data.descripcion,
+          foto_base64,
+          foto_mime,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        setSubmitError(json.error ?? "Error al enviar el reclamo. Intentá de nuevo.");
+        return;
+      }
+
+      setNumeroSeguimiento(json.numero_seguimiento);
+      setSubmitted(true);
+    } catch {
+      setSubmitError("Error de conexión. Verificá tu internet e intentá de nuevo.");
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   const catLabel = CATEGORIA_LABELS[categoria] ?? categoria;
@@ -256,20 +311,45 @@ export default function ReclamoWizard({ categoria, onClose }: ReclamoWizardProps
           <div>
             <h3 className="text-2xl font-extrabold text-[#32105B]">¡Reclamo enviado!</h3>
             <p className="mt-2 text-sm text-gray-500 leading-relaxed max-w-xs">
-              Tu reclamo fue registrado. En breve recibirás un número de seguimiento.
+              Tu reclamo fue registrado exitosamente. Guardá tu número para hacer seguimiento.
             </p>
           </div>
-          <div className="w-full bg-[#F8F5FF] rounded-2xl px-5 py-4 text-left">
+          {numeroSeguimiento && (
+            <div className="w-full bg-[#F8F5FF] rounded-2xl px-5 py-5 text-center border border-[#EDE4FA]">
+              <p className="text-[0.65rem] font-bold uppercase tracking-widest text-[#6011E8] mb-2">
+                Tu número de seguimiento
+              </p>
+              <p className="font-mono text-2xl font-extrabold text-[#32105B] tracking-wider">
+                {numeroSeguimiento}
+              </p>
+              <p className="mt-2 text-xs text-gray-400">
+                Podés consultar el estado de tu reclamo en cualquier momento
+              </p>
+            </div>
+          )}
+          <div className="w-full bg-gray-50 rounded-2xl px-5 py-4 text-left">
             <p className="text-xs font-bold uppercase tracking-widest text-[#6011E8] mb-1">Categoría</p>
             <p className="font-bold text-[#32105B]">{catIcon} {catLabel} — {data.subcategoria}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="w-full py-3.5 rounded-2xl text-sm font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #32105B 0%, #6011E8 100%)" }}
-          >
-            Cerrar
-          </button>
+          <div className="flex w-full flex-col gap-2">
+            <a
+              href={`https://wa.me/541128365690?text=${encodeURIComponent(
+                `Hola! Acabo de registrar un reclamo. Mi número de seguimiento es: ${numeroSeguimiento ?? ""} — Categoría: ${catLabel}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold text-white"
+              style={{ backgroundColor: "#25D366" }}
+            >
+              💬 Compartir por WhatsApp
+            </a>
+            <button
+              onClick={onClose}
+              className="w-full py-3 rounded-2xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       </Overlay>
     );
@@ -525,32 +605,41 @@ export default function ReclamoWizard({ categoria, onClose }: ReclamoWizardProps
       </div>
 
       {/* Footer */}
-      <div className="flex gap-3 border-t border-gray-100 px-6 py-4">
-        {step > 1 && (
-          <button
-            onClick={back}
-            className="flex-1 rounded-2xl border border-gray-200 py-3.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50"
-          >
-            Volver
-          </button>
+      <div className="flex flex-col gap-2 border-t border-gray-100 px-6 py-4">
+        {submitError && (
+          <p className="rounded-xl bg-red-50 px-3 py-2.5 text-xs font-medium text-red-600 text-center">
+            {submitError}
+          </p>
         )}
-        {step < TOTAL_STEPS ? (
-          <button
-            onClick={next}
-            className="flex-1 rounded-2xl py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-            style={{ background: "linear-gradient(135deg, #32105B 0%, #6011E8 100%)" }}
-          >
-            Continuar →
-          </button>
-        ) : (
-          <button
-            onClick={handleSubmit}
-            className="flex-1 rounded-2xl py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-            style={{ background: "linear-gradient(135deg, #32105B 0%, #6011E8 100%)" }}
-          >
-            Enviar Reclamo ✓
-          </button>
-        )}
+        <div className="flex gap-3">
+          {step > 1 && (
+            <button
+              onClick={back}
+              disabled={submitLoading}
+              className="flex-1 rounded-2xl border border-gray-200 py-3.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50"
+            >
+              Volver
+            </button>
+          )}
+          {step < TOTAL_STEPS ? (
+            <button
+              onClick={next}
+              className="flex-1 rounded-2xl py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+              style={{ background: "linear-gradient(135deg, #32105B 0%, #6011E8 100%)" }}
+            >
+              Continuar →
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={submitLoading}
+              className="flex-1 rounded-2xl py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+              style={{ background: "linear-gradient(135deg, #32105B 0%, #6011E8 100%)" }}
+            >
+              {submitLoading ? "Enviando..." : "Enviar Reclamo ✓"}
+            </button>
+          )}
+        </div>
       </div>
     </Overlay>
   );
