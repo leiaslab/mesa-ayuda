@@ -282,23 +282,70 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="bg-[#1A0830] px-4 py-8 text-center">
-        <div className="mx-auto max-w-md">
-          <p className="text-sm font-semibold text-white">
-            Bloque La Libertad Avanza Avellaneda
-          </p>
-          <p className="mt-1 text-xs text-white/35">
-            Mesa de Ayuda Vecinal &copy; 2026
-          </p>
-          <div className="mt-5 flex items-center justify-center gap-4">
-            <Link href="/consulta" className="text-xs text-white/40 transition-colors">
-              Consultar Reclamo
-            </Link>
-            <span className="text-white/20">·</span>
-            <Link href="/admin" className="text-xs text-white/40 transition-colors">
-              Panel Admin
-            </Link>
+      <footer style={{ backgroundColor: "#32105B" }}>
+        {/* Cuerpo del footer */}
+        <div className="mx-auto max-w-6xl px-8 py-14 md:px-12 lg:px-16">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
+
+            {/* Logo */}
+            <div className="flex items-start">
+              <LogoLLA className="h-auto w-[100px] opacity-80" />
+            </div>
+
+            {/* Sobre Nosotros */}
+            <div>
+              <h3 className="mb-4 text-base font-bold text-white">
+                Sobre Nosotros
+              </h3>
+              <ul className="space-y-3">
+                {["Principios", "Galería", "Sumate"].map((item) => (
+                  <li key={item}>
+                    <Link
+                      href="#"
+                      className="text-sm text-white/70 transition-colors hover:text-white"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Información Legal */}
+            <div>
+              <h3 className="mb-4 text-base font-bold text-white">
+                Información Legal
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  "Contacto",
+                  "Términos de uso",
+                  "Política de privacidad",
+                  "Botón de arrepentimiento",
+                ].map((item) => (
+                  <li key={item}>
+                    <Link
+                      href="#"
+                      className="text-sm text-white/70 transition-colors hover:text-white"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
           </div>
+        </div>
+
+        {/* Barra inferior */}
+        <div
+          className="border-t px-8 py-5 text-center"
+          style={{ borderColor: "rgba(255,255,255,0.1)" }}
+        >
+          <p className="text-sm text-white/60">
+            &copy; 2026 La Libertad Avanza. Todos los derechos reservados.
+          </p>
         </div>
       </footer>
     </div>
