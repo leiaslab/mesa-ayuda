@@ -213,18 +213,11 @@ export default function Home() {
           <h2 className="mb-2 text-xl font-bold leading-tight text-white">
             ¿Tenés un problema en tu barrio?
           </h2>
-          <p className="mb-8 text-sm leading-relaxed text-white/65">
+          <p className="text-sm leading-relaxed text-white/65">
             Tu reclamo es importante para nosotros.
             <br />
             Lo registramos, lo asignamos y lo resolvemos.
           </p>
-          <Link
-            href="/reclamo"
-            className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-white px-8 py-4 text-base font-bold text-[#32105B] shadow-xl transition-all active:scale-95"
-          >
-            <span className="text-lg">📝</span>
-            Hacer mi Reclamo
-          </Link>
         </div>
       </section>
 
