@@ -72,34 +72,45 @@ export default function Home() {
       <div className="flex min-h-svh flex-col">
         <header className="bg-[#35105f] px-5 pt-5 pb-3 md:px-8 md:pt-6 md:pb-3 lg:px-[72px] lg:pt-[18px] lg:pb-[6px]">
           <div className="mx-auto flex max-w-[1366px] flex-col gap-3">
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div className="max-w-xl">
+            {/* Grid 3 columnas: identidad | pill centrada | vacío */}
+            <div className="grid grid-cols-3 items-center">
+
+              {/* COL 1 — identidad izquierda */}
+              <div>
                 <LogoLLA
                   priority
-                  className="h-auto w-[170px] md:w-[198px] lg:w-[202px]"
+                  className="h-auto w-[150px] md:w-[180px] lg:w-[200px]"
                 />
-
-                <div className="mt-4 pl-3 md:mt-4 md:pl-4 lg:mt-[18px] lg:pl-[16px]">
-                  <p className="text-[1.34rem] font-extrabold tracking-[-0.03em] text-white md:text-[1.45rem] lg:text-[1.4rem]">
+                <div className="mt-3 pl-1">
+                  <p className="text-[1.1rem] font-extrabold tracking-[-0.02em] text-white lg:text-[1.25rem]">
                     Cristian Frattini
                   </p>
-                  <p className="mt-1 text-[0.8rem] font-semibold text-white/84 md:text-[0.82rem] lg:text-[0.74rem]">
+                  <p className="mt-0.5 text-[0.78rem] font-semibold text-white/75 lg:text-[0.8rem]">
                     Bloque La Libertad Avanza Avellaneda
                   </p>
-                  <p className="mt-0.5 text-[0.7rem] text-white/45 md:text-[0.72rem] lg:text-[0.64rem]">
+                  <p className="mt-0.5 text-[0.68rem] text-white/45 lg:text-[0.7rem]">
                     Coordinador local
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col items-start gap-2 self-start md:items-end lg:mt-[6px] lg:min-w-[320px]">
+              {/* COL 2 — pill centrada */}
+              <div className="flex justify-center">
+                <span
+                  className="inline-flex rounded-full px-6 py-2.5 text-sm font-bold uppercase tracking-[0.1em] text-white lg:px-8 lg:py-3 lg:text-[15px]"
+                  style={{
+                    backgroundColor: "rgba(120,50,200,0.55)",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    boxShadow: "0 0 20px rgba(120,50,200,0.4)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  Mesa de Ayuda Virtual
+                </span>
               </div>
-            </div>
 
-            <div className="flex justify-center lg:-mt-20">
-              <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-7 py-3 text-sm font-semibold capitalize tracking-[0.02em] text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm md:px-8 md:py-3.5 md:text-base lg:px-10 lg:py-4 lg:text-lg">
-                Mesa de Ayuda Virtual
-              </span>
+              {/* COL 3 — vacío para balancear */}
+              <div />
             </div>
           </div>
         </header>
