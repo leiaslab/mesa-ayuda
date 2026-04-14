@@ -96,7 +96,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex justify-center lg:-mt-10">
+            <div className="flex justify-center lg:-mt-20">
               <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-7 py-3 text-sm font-semibold capitalize tracking-[0.02em] text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm md:px-8 md:py-3.5 md:text-base lg:px-10 lg:py-4 lg:text-lg">
                 Mesa de Ayuda Virtual
               </span>
