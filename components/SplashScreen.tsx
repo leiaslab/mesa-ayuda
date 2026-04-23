@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
-export default function SplashScreen() {
+export default function SplashScreen({ src = "/splash.jpeg" }: { src?: string }) {
   const [visible, setVisible] = useState(true);
-  const [fading,  setFading]  = useState(false);
+  const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    // Iniciar fade-out 300ms antes del unmount
-    const fadeTimer = setTimeout(() => setFading(true),  2700);
-    const hideTimer = setTimeout(() => setVisible(false), 3000);
+    const fadeTimer = setTimeout(() => setFading(true), 1700);
+    const hideTimer = setTimeout(() => setVisible(false), 2000);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -22,18 +21,31 @@ export default function SplashScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-[#f4f0fa] px-4 transition-opacity duration-300 ${
         fading ? "opacity-0" : "opacity-100"
       }`}
     >
-      <Image
-        src="/splash.png"
-        alt="Mesa de Ayuda"
-        width={160}
-        height={160}
-        className="h-auto w-40"
-        priority
-      />
+      <div className="w-full max-w-[340px] rounded-[28px] bg-white p-3 shadow-[0_20px_60px_rgba(40,14,74,0.22)] md:max-w-[400px]">
+        <div className="overflow-hidden rounded-[20px]">
+          <Image
+            src={src}
+            alt="Splash de entrada"
+            width={572}
+            height={800}
+            priority
+            unoptimized={src.startsWith("http")}
+            className="h-auto w-full"
+          />
+        </div>
+        <div className="px-3 pb-2 pt-4 text-center">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#8b78ab]">
+            Mesa de Ayuda Avellaneda
+          </p>
+          <p className="mt-2 text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#4C1182]">
+            Conducci&oacute;n Cristian Frattini
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

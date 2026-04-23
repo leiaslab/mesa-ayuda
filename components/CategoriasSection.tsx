@@ -8,19 +8,19 @@ const categories = [
     icon: "🛣️",
     label: "Calles",
     key: "calles",
-    desc: "Baches, cordones, veredas",
+    desc: "Baches, veredas, poda y señalización",
   },
   {
     icon: "💡",
     label: "Alumbrado",
     key: "alumbrado",
-    desc: "Postes y luminarias",
+    desc: "Falta o reparación de iluminaria pública",
   },
   {
     icon: "💧",
     label: "Aguas",
     key: "aguas",
-    desc: "Pérdidas y cloacas",
+    desc: "Bocas de tormenta, pérdidas y cloacas",
   },
   {
     icon: "🗑️",
@@ -38,7 +38,7 @@ const categories = [
     icon: "🔒",
     label: "Inseguridad",
     key: "inseguridad",
-    desc: "Iluminación y espacios",
+    desc: "Cámaras y presencia policial",
   },
   {
     icon: "📋",
@@ -49,7 +49,11 @@ const categories = [
   },
 ];
 
-export default function CategoriasSection() {
+export default function CategoriasSection({
+  whatsappUrl,
+}: {
+  whatsappUrl: string;
+}) {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState("");
 
@@ -65,33 +69,35 @@ export default function CategoriasSection() {
 
   return (
     <>
-      <section className="bg-gray-50 px-4 py-10">
-        <div className="mx-auto max-w-md">
-          <h2 className="mb-1 text-xl font-bold text-[#32105B]">
-            ¿Qué necesitás reportar?
-          </h2>
-          <p className="mb-6 text-sm text-gray-400">
-            Seleccioná la categoría de tu reclamo
-          </p>
+      <section className="bg-white px-5 py-14 md:px-8 lg:px-[72px] lg:py-16">
+        <div className="mx-auto max-w-[1366px]">
+          <div className="max-w-[640px]">
+            <h2 className="text-3xl font-bold tracking-[-0.03em] text-[#4C1182] md:text-4xl">
+              ¿Qué necesitás reportar?
+            </h2>
+            <p className="mt-3 text-base leading-7 text-[#776c90]">
+              Seleccioná la categoría de tu reclamo para abrir el formulario correspondiente.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:mt-10 lg:grid-cols-4 lg:gap-4">
             {categories.map((cat) => (
               <button
                 key={cat.key}
+                type="button"
                 onClick={() => openWizard(cat.key)}
-                className={`rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md active:scale-95 text-left ${
-                  cat.wide ? "col-span-2 flex flex-row items-center gap-3" : "flex flex-col gap-3"
+                className={`rounded-[24px] border border-[#efe6fb] bg-[#fbf8ff] p-5 text-left shadow-[0_14px_36px_rgba(61,16,109,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(61,16,109,0.12)] active:scale-[0.99] ${
+                  cat.wide
+                    ? "flex flex-row items-center gap-3 sm:col-span-2 lg:col-span-2"
+                    : "flex flex-col gap-3"
                 }`}
-                style={{ border: "1px solid #F0EBF8" }}
               >
                 <span className="text-3xl">{cat.icon}</span>
                 <div>
-                  <p className="text-sm font-semibold leading-tight text-[#32105B]">
+                  <p className="text-base font-semibold leading-tight text-[#4C1182]">
                     {cat.label}
                   </p>
-                  <p className="mt-0.5 text-xs leading-snug text-gray-400">
-                    {cat.desc}
-                  </p>
+                  <p className="mt-1 text-sm leading-6 text-[#7d7097]">{cat.desc}</p>
                 </div>
               </button>
             ))}
@@ -100,7 +106,11 @@ export default function CategoriasSection() {
       </section>
 
       {wizardOpen && selectedCategoria && (
-        <ReclamoWizard categoria={selectedCategoria} onClose={closeWizard} />
+        <ReclamoWizard
+          categoria={selectedCategoria}
+          onClose={closeWizard}
+          whatsappUrl={whatsappUrl}
+        />
       )}
     </>
   );

@@ -1,68 +1,138 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { createClient as createServerClient } from "@/lib/supabase/server";
-import type { Database } from "@/types/database";
-
-function getAdminClient() {
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-}
+import { createAuditLog } from "@/lib/security/audit";
+import { consumeRateLimit } from "@/lib/security/rate-limit";
+import { getClientIp, getUserAgent } from "@/lib/security/request";
+import {
+  ensureAssignableRole,
+  getConfiguredSuperadminEmail,
+  getServerAccessContext,
+} from "@/lib/security/auth";
+import { sanitizeEmail, sanitizeText } from "@/lib/security/sanitize";
+import { SECURITY_RATE_LIMITS } from "@/lib/config/internal";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
-  try {
-    // Verificar que quien llama es super_admin
-    const serverSupabase = await createServerClient();
-    const { data: { user } } = await serverSupabase.auth.getUser();
+  const { user, role } = await getServerAccessContext();
+  const ip = getClientIp(request);
+  const userAgent = getUserAgent(request);
 
-    if (!user) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (!user || role !== "super_admin") {
+    await createAuditLog({
+      userId: user?.id ?? null,
+      accion: "admin_create_denied",
+      entidad: "users",
+      detalle: { reason: "forbidden" },
+      ip,
+      userAgent,
+    });
+
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  const rateLimit = consumeRateLimit({
+    key: `create-admin:${user.id}`,
+    ...SECURITY_RATE_LIMITS.sensitiveWrites,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Demasiadas acciones sensibles. Intentá nuevamente en unos minutos." },
+      { status: 429 }
+    );
+  }
+
+  const body = await request.json();
+  const nombre = sanitizeText(body.nombre, 120);
+  const email = sanitizeEmail(body.email);
+  const password = typeof body.password === "string" ? body.password.trim() : "";
+  const rol = ensureAssignableRole(email, "admin");
+
+  if (!nombre || !email || password.length < 8) {
+    return NextResponse.json(
+      { error: "Completá nombre, email válido y una contraseña de al menos 8 caracteres." },
+      { status: 400 }
+    );
+  }
+
+  if (email === getConfiguredSuperadminEmail()) {
+    return NextResponse.json(
+      { error: "Ese email está reservado para el superadmin principal." },
+      { status: 400 }
+    );
+  }
+
+  const service = createServiceRoleClient();
+
+  // Intentar crear. Si ya existe en Auth, recuperarlo y sincronizar.
+  let resolvedId: string;
+
+  const { data: created, error: authError } = await service.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { nombre, rol },
+  });
+
+  if (authError) {
+    const alreadyExists = authError.message.toLowerCase().includes("already");
+
+    if (!alreadyExists) {
+      await createAuditLog({
+        userId: user.id,
+        accion: "admin_create_failed",
+        entidad: "users",
+        detalle: { email, message: authError.message },
+        ip,
+        userAgent,
+      });
+      return NextResponse.json(
+        { error: `No se pudo crear el usuario: ${authError.message}` },
+        { status: 400 }
+      );
     }
 
-    const { data: profile } = await serverSupabase
-      .from("users")
-      .select("rol")
-      .eq("id", user.id)
-      .single();
+    // Ya existe en Auth — buscar su ID y sincronizar con la tabla users
+    const { data: listData, error: listError } = await service.auth.admin.listUsers();
+    const existing = listData?.users.find((u) => u.email === email);
 
-    if (profile?.rol !== "super_admin") {
-      return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+    if (listError || !existing) {
+      return NextResponse.json(
+        { error: "El email ya está registrado y no se pudo recuperar el usuario." },
+        { status: 409 }
+      );
     }
 
-    const { nombre, email, password, rol } = await request.json();
-
-    if (!nombre || !email || !password || !rol) {
-      return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
-    }
-
-    const adminClient = getAdminClient();
-
-    // Crear usuario en Supabase Auth con metadata
-    const { data: newUser, error } = await adminClient.auth.admin.createUser({
-      email,
+    // Actualizar contraseña y metadata si viene nueva
+    await service.auth.admin.updateUserById(existing.id, {
       password,
-      email_confirm: true,
       user_metadata: { nombre, rol },
     });
 
-    if (error || !newUser.user) {
-      return NextResponse.json({ error: error?.message ?? "Error al crear usuario" }, { status: 400 });
+    resolvedId = existing.id;
+  } else {
+    if (!created.user) {
+      return NextResponse.json({ error: "No se pudo crear el usuario." }, { status: 400 });
     }
-
-    // El trigger handle_new_user crea el registro en public.users automáticamente.
-    // Si no tiene el trigger, insertamos manualmente:
-    await adminClient.from("users").upsert({
-      id:     newUser.user.id,
-      nombre,
-      email,
-      rol,
-    });
-
-    return NextResponse.json({ success: true, id: newUser.user.id });
-  } catch (err) {
-    console.error("Error en POST /api/usuarios:", err);
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+    resolvedId = created.user.id;
   }
+
+  await service.from("users").upsert({
+    id: resolvedId,
+    nombre,
+    email,
+    rol,
+    activo: true,
+  }, { onConflict: "id" });
+
+  await createAuditLog({
+    userId: user.id,
+    accion: "admin_created",
+    entidad: "users",
+    entidadId: resolvedId,
+    detalle: { email, rol },
+    ip,
+    userAgent,
+  });
+
+  return NextResponse.json({ success: true, id: resolvedId });
 }

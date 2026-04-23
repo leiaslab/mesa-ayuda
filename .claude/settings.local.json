@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "Bash(npx tsc:*)",
+      "Bash(taskkill /PID 45616 /F)",
+      "PowerShell(Stop-Process -Id 45616 -Force)",
+      "PowerShell($p = \\(Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -First 1\\).OwningProcess; if \\($p\\) { Stop-Process -Id $p -Force; \"Killed PID $p\" } else { \"No process on 3000\" })"
     ]
   }
 }

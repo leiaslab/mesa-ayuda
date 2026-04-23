@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/PC/AppData/Local/Temp/**)",
+      "Bash(node -e ' *)",
+      "Bash(sort -t_ -k1)",
+      "Bash(ls -lt \"C:/Users/PC/Downloads/\"la-cucha-de-hanna-drive-*.json)"
+    ]
+  }
+}
