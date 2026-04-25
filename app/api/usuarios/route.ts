@@ -10,13 +10,14 @@ import {
 import { sanitizeEmail, sanitizeText } from "@/lib/security/sanitize";
 import { SECURITY_RATE_LIMITS } from "@/lib/config/internal";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import type { UserRol } from "@/types/database";
 
 export async function POST(request: NextRequest) {
   const { user, role } = await getServerAccessContext();
   const ip = getClientIp(request);
   const userAgent = getUserAgent(request);
 
-  if (!user || role !== "super_admin") {
+  if (!user || (role !== "super_admin" && role !== "admin")) {
     await createAuditLog({
       userId: user?.id ?? null,
       accion: "admin_create_denied",
@@ -45,7 +46,12 @@ export async function POST(request: NextRequest) {
   const nombre = sanitizeText(body.nombre, 120);
   const email = sanitizeEmail(body.email);
   const password = typeof body.password === "string" ? body.password.trim() : "";
-  const rol = ensureAssignableRole(email, "admin");
+
+  // Admins solo pueden crear admins; super_admin puede asignar cualquier rol
+  const requestedRol = (typeof body.rol === "string" ? body.rol : "admin") as UserRol;
+  const rol = role === "super_admin"
+    ? ensureAssignableRole(email, requestedRol)
+    : "admin";
 
   if (!nombre || !email || password.length < 8) {
     return NextResponse.json(
@@ -129,7 +135,7 @@ export async function POST(request: NextRequest) {
     accion: "admin_created",
     entidad: "users",
     entidadId: resolvedId,
-    detalle: { email, rol },
+    detalle: { email, rol, creado_por_rol: role },
     ip,
     userAgent,
   });

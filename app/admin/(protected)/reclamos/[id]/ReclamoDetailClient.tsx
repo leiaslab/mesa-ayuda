@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { StatusBadge, PrioridadBadge } from "@/components/admin/StatusBadge";
 import type { ReclamoCompleto, ReclamoEstado, ReclamoPrioridad } from "@/types/database";
 import { ESTADO_LABELS, PRIORIDAD_LABELS } from "@/types/database";
@@ -23,7 +22,6 @@ export default function ReclamoDetailClient({
   estadoActual,
   prioridadActual,
   observaciones,
-  userId,
 }: Props) {
   const router   = useRouter();
 
@@ -39,18 +37,15 @@ export default function ReclamoDetailClient({
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("reclamos")
-      .update({
-        estado,
-        prioridad,
-        observaciones_internas: obs || null,
-      })
-      .eq("id", reclamo.id);
+    const res = await fetch(`/api/admin/reclamos/${reclamo.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado, prioridad, observaciones: obs }),
+    });
 
-    if (error) {
-      setError("Error al guardar los cambios");
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      setError(json.error ?? "Error al guardar los cambios");
     } else {
       setSaved(true);
       setTimeout(() => {
@@ -62,7 +57,6 @@ export default function ReclamoDetailClient({
   };
 
   const handleGenerar = async (tipo: "pdf" | "word" | "excel") => {
-    console.log("[handleGenerar] tipo:", tipo, "reclamo:", reclamo?.numero_seguimiento);
     setGenLoading(tipo);
     setError(null);
     try {
@@ -73,12 +67,17 @@ export default function ReclamoDetailClient({
         const { generarWordHCD } = await import("@/lib/documents/word-client");
         await generarWordHCD(reclamo);
       } else {
-        console.log("[handleGenerar] importando excel-client...");
         const { generarExcelHCD } = await import("@/lib/documents/excel-client");
-        console.log("[handleGenerar] llamando generarExcelHCD con:", reclamo?.id);
         await generarExcelHCD(reclamo);
-        console.log("[handleGenerar] excel generado OK");
       }
+
+      // Registrar audit log de documento generado
+      fetch(`/api/admin/reclamos/${reclamo.id}/audit-doc`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo }),
+      }).catch(() => null);
+
     } catch (err) {
       console.error("[handleGenerar] error:", err);
       setError(`Error al generar el ${tipo.toUpperCase()}`);

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/security/auth";
+import SuperadminResetButton from "./SuperadminResetButton";
 import { createClient } from "@/lib/supabase/server";
 import {
   AGE_RANGE_LABELS,
@@ -96,9 +97,13 @@ export default async function SuperadminPage({
           <Link href="/admin/usuarios" className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-[#4C1182]">
             Gestionar admins
           </Link>
+          <Link href="/superadmin/auditoria" className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-[#4C1182]">
+            Auditoría completa
+          </Link>
           <Link href="/admin/contenidos" className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-[#4C1182]">
             Contenido editable
           </Link>
+          <SuperadminResetButton />
         </div>
       </div>
 

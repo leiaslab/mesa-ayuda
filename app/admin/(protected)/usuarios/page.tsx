@@ -2,7 +2,7 @@ import { requireRole } from "@/lib/security/auth";
 import UsuariosClient from "./UsuariosClient";
 
 export default async function UsuariosPage() {
-  const { supabase, user } = await requireRole("super_admin");
+  const { supabase, user, role } = await requireRole("admin");
 
   const { data: usuarios } = await supabase
     .from("users")
@@ -16,7 +16,11 @@ export default async function UsuariosPage() {
         <p className="mt-1 text-sm text-gray-400">Gestión segura de administradores</p>
       </div>
 
-      <UsuariosClient usuarios={usuarios ?? []} currentUserId={user.id} />
+      <UsuariosClient
+        usuarios={usuarios ?? []}
+        currentUserId={user.id}
+        currentUserRole={role!}
+      />
     </div>
   );
 }

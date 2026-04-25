@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import type { User, UserRol } from "@/types/database";
 
 type Props = {
-  usuarios:      User[];
-  currentUserId: string;
+  usuarios:        User[];
+  currentUserId:   string;
+  currentUserRole: UserRol;
 };
 
-export default function UsuariosClient({ usuarios, currentUserId }: Props) {
+export default function UsuariosClient({ usuarios, currentUserId, currentUserRole }: Props) {
   const router   = useRouter();
+  const isSuperAdmin = currentUserRole === "super_admin";
 
   const [showModal, setShowModal]   = useState(false);
   const [nombre,    setNombre]      = useState("");
@@ -40,7 +42,7 @@ export default function UsuariosClient({ usuarios, currentUserId }: Props) {
     }
 
     setShowModal(false);
-    setNombre(""); setEmail(""); setPassword("");
+    setNombre(""); setEmail(""); setPassword(""); setRol("admin");
     router.refresh();
     setLoading(false);
   };
@@ -79,7 +81,7 @@ export default function UsuariosClient({ usuarios, currentUserId }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
-                {["Nombre", "Email", "Rol", "Estado", "Creado", "Acciones"].map((h) => (
+                {["Nombre", "Email", "Rol", "Estado", "Creado", ...(isSuperAdmin ? ["Acciones"] : [])].map((h) => (
                   <th
                     key={h}
                     className="px-5 py-3 text-left text-[0.65rem] font-bold uppercase tracking-widest text-gray-400"
@@ -100,7 +102,7 @@ export default function UsuariosClient({ usuarios, currentUserId }: Props) {
                   </td>
                   <td className="px-5 py-3.5 text-xs text-gray-600">{u.email}</td>
                   <td className="px-5 py-3.5">
-                    {u.id === currentUserId ? (
+                    {u.id === currentUserId || !isSuperAdmin ? (
                       <span className="text-xs font-bold text-gray-500">
                         {u.rol === "super_admin" ? "Super Admin" : "Admin"}
                       </span>
@@ -127,18 +129,20 @@ export default function UsuariosClient({ usuarios, currentUserId }: Props) {
                   <td className="px-5 py-3.5 text-xs text-gray-400">
                     {new Date(u.created_at).toLocaleDateString("es-AR")}
                   </td>
-                  <td className="px-5 py-3.5">
-                    {u.id !== currentUserId && (
-                      <button
-                        onClick={() => handleToggleActivo(u.id, u.activo)}
-                        className={`text-xs font-semibold ${
-                          u.activo ? "text-red-500 hover:underline" : "text-green-600 hover:underline"
-                        }`}
-                      >
-                        {u.activo ? "Desactivar" : "Activar"}
-                      </button>
-                    )}
-                  </td>
+                  {isSuperAdmin && (
+                    <td className="px-5 py-3.5">
+                      {u.id !== currentUserId && (
+                        <button
+                          onClick={() => handleToggleActivo(u.id, u.activo)}
+                          className={`text-xs font-semibold ${
+                            u.activo ? "text-red-500 hover:underline" : "text-green-600 hover:underline"
+                          }`}
+                        >
+                          {u.activo ? "Desactivar" : "Activar"}
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -156,8 +160,8 @@ export default function UsuariosClient({ usuarios, currentUserId }: Props) {
             <h2 className="mb-6 text-lg font-extrabold text-[#4C1182]">Nuevo administrador</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               {[
-                { label: "Nombre completo", value: nombre, setter: setNombre, type: "text",     placeholder: "Nombre Apellido" },
-                { label: "Email",           value: email,  setter: setEmail,  type: "email",    placeholder: "admin@ejemplo.com" },
+                { label: "Nombre completo", value: nombre,   setter: setNombre,   type: "text",     placeholder: "Nombre Apellido" },
+                { label: "Email",           value: email,    setter: setEmail,    type: "email",    placeholder: "admin@ejemplo.com" },
                 { label: "Contraseña",      value: password, setter: setPassword, type: "password", placeholder: "Mínimo 8 caracteres" },
               ].map((f) => (
                 <div key={f.label} className="flex flex-col gap-1.5">
@@ -175,19 +179,22 @@ export default function UsuariosClient({ usuarios, currentUserId }: Props) {
                 </div>
               ))}
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-400">
-                  Rol
-                </label>
-                <select
-                  value={rol}
-                  onChange={(e) => setRol(e.target.value as UserRol)}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none focus:border-[#9333EA]"
-                >
-                  <option value="admin">Admin</option>
-                  <option value="super_admin">Super Admin</option>
-                </select>
-              </div>
+              {/* Solo super_admin puede asignar cualquier rol */}
+              {isSuperAdmin && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[0.65rem] font-bold uppercase tracking-widest text-gray-400">
+                    Rol
+                  </label>
+                  <select
+                    value={rol}
+                    onChange={(e) => setRol(e.target.value as UserRol)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none focus:border-[#9333EA]"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="super_admin">Super Admin</option>
+                  </select>
+                </div>
+              )}
 
               {error && (
                 <p className="rounded-xl bg-red-50 px-3 py-2.5 text-xs font-medium text-red-600">

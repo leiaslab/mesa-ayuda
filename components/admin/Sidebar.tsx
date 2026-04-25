@@ -14,9 +14,10 @@ const NAV_ITEMS = [
   { href: "/admin/documentos", label: "Documentos", icon: "Docs", roles: ["super_admin", "admin"] },
   { href: "/admin/splash", label: "Splash", icon: "Imagen", roles: ["super_admin", "admin"] },
   { href: "/admin/base-datos", label: "Base de datos", icon: "DB", roles: ["super_admin", "admin"] },
-  { href: "/admin/usuarios", label: "Admins", icon: "Team", roles: ["super_admin"] },
+  { href: "/admin/usuarios", label: "Admins", icon: "Team", roles: ["super_admin", "admin"] },
   { href: "/admin/configuracion", label: "Config", icon: "Ajustes", roles: ["super_admin"] },
   { href: "/superadmin", label: "Superadmin", icon: "Root", roles: ["super_admin"] },
+  { href: "/superadmin/auditoria", label: "Auditoría", icon: "Audit", roles: ["super_admin"] },
 ] as const;
 
 type Props = {

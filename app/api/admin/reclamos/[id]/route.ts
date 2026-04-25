@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAuditLog } from "@/lib/security/audit";
 import { getClientIp, getUserAgent } from "@/lib/security/request";
 import { getServerAccessContext } from "@/lib/security/auth";
-import { sanitizeMultilineText, sanitizeText } from "@/lib/security/sanitize";
+import { sanitizeMultilineText } from "@/lib/security/sanitize";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import type { ReclamoEstado, ReclamoPrioridad, Reclamo } from "@/types/database";
 
@@ -29,7 +29,7 @@ export async function PATCH(
   const ip = getClientIp(request);
   const userAgent = getUserAgent(request);
 
-  const { user, role } = await getServerAccessContext();
+  const { user, role, profile } = await getServerAccessContext();
 
   if (!user || !role) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -50,7 +50,7 @@ export async function PATCH(
 
   const observaciones =
     typeof body.observaciones === "string"
-      ? sanitizeMultilineText(body.observaciones, 2000)
+      ? (sanitizeMultilineText(body.observaciones, 2000) || null)
       : undefined;
 
   if (!estado && !prioridad && observaciones === undefined) {
@@ -59,7 +59,6 @@ export async function PATCH(
 
   const service = createServiceRoleClient();
 
-  // Leer estado anterior para el historial
   const { data: reclamoActual } = await service
     .from("reclamos")
     .select("estado, prioridad")
@@ -93,6 +92,20 @@ export async function PATCH(
       comentario: null,
       usuario_id: user.id,
     });
+
+    await createAuditLog({
+      userId: user.id,
+      accion: "estado_cambiado",
+      entidad: "reclamos",
+      entidadId: id,
+      detalle: {
+        estado_anterior: reclamoActual.estado,
+        estado_nuevo: estado,
+        admin_nombre: profile?.nombre ?? user.email,
+      },
+      ip,
+      userAgent,
+    });
   }
 
   await createAuditLog({
@@ -101,6 +114,57 @@ export async function PATCH(
     entidad: "reclamos",
     entidadId: id,
     detalle: { ...updates, role },
+    ip,
+    userAgent,
+  });
+
+  return NextResponse.json({ success: true });
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const ip = getClientIp(request);
+  const userAgent = getUserAgent(request);
+
+  const { user, role, profile } = await getServerAccessContext();
+
+  if (!user || role !== "super_admin") {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  const service = createServiceRoleClient();
+
+  const { data: reclamo } = await service
+    .from("reclamos")
+    .select("id, numero_seguimiento")
+    .eq("id", id)
+    .single();
+
+  if (!reclamo) {
+    return NextResponse.json({ error: "Reclamo no encontrado." }, { status: 404 });
+  }
+
+  const { error: deleteError } = await service
+    .from("reclamos")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) {
+    return NextResponse.json({ error: "No se pudo eliminar el reclamo." }, { status: 500 });
+  }
+
+  await createAuditLog({
+    userId: user.id,
+    accion: "reclamo_eliminado",
+    entidad: "reclamos",
+    entidadId: id,
+    detalle: {
+      numero_seguimiento: reclamo.numero_seguimiento,
+      eliminado_por: profile?.nombre ?? user.email,
+    },
     ip,
     userAgent,
   });
