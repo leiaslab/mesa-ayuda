@@ -37,14 +37,6 @@ export default function SplashScreen({ src = "/splash.jpeg" }: { src?: string })
             className="h-auto w-full"
           />
         </div>
-        <div className="px-3 pb-2 pt-4 text-center">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#8b78ab]">
-            Mesa de Ayuda Avellaneda
-          </p>
-          <p className="mt-2 text-[1.05rem] font-extrabold tracking-[-0.03em] text-[#4C1182]">
-            Conducci&oacute;n Cristian Frattini
-          </p>
-        </div>
       </div>
     </div>
   );

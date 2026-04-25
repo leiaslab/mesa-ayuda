@@ -62,6 +62,7 @@ export default function ReclamoDetailClient({
   };
 
   const handleGenerar = async (tipo: "pdf" | "word" | "excel") => {
+    console.log("[handleGenerar] tipo:", tipo, "reclamo:", reclamo?.numero_seguimiento);
     setGenLoading(tipo);
     setError(null);
     try {
@@ -72,10 +73,14 @@ export default function ReclamoDetailClient({
         const { generarWordHCD } = await import("@/lib/documents/word-client");
         await generarWordHCD(reclamo);
       } else {
+        console.log("[handleGenerar] importando excel-client...");
         const { generarExcelHCD } = await import("@/lib/documents/excel-client");
+        console.log("[handleGenerar] llamando generarExcelHCD con:", reclamo?.id);
         await generarExcelHCD(reclamo);
+        console.log("[handleGenerar] excel generado OK");
       }
-    } catch {
+    } catch (err) {
+      console.error("[handleGenerar] error:", err);
       setError(`Error al generar el ${tipo.toUpperCase()}`);
     } finally {
       setGenLoading(null);

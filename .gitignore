@@ -1,1 +1,18 @@
+# dependencies
 node_modules
+
+# Next.js
+.next/
+out/
+
+# env files
+.env*.local
+
+# Vercel
+.vercel
+
+# build info
+tsconfig.tsbuildinfo
+
+# Supabase temp
+supabase/.temp/
