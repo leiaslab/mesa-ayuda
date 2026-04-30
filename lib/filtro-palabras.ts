@@ -25,6 +25,18 @@ const PALABRAS: string[] = [
   "estupido", "estupida", "estupidos", "estupidas",
   "idiota", "idiotas",
   "garca", "garcas",
+  // coger y conjugaciones (en Argentina tiene exclusivamente significado sexual)
+  "coger", "coge", "coges", "cogen", "cogete", "cogela", "cogelo",
+  "cogiendo", "cogido", "cogida", "cogidos", "cogidas",
+  // garchar y conjugaciones
+  "garchar", "garcha", "garchan", "garchando", "garchado", "garchada",
+  // culear y conjugaciones
+  "culear", "culea", "culean", "culeando", "culeado", "culeada",
+  // joder
+  "joder", "jode", "jodes", "joden", "jodete",
+  // put* adicionales
+  "reputa", "reputo",
+  "hptm",
 ];
 
 const FRASES: string[] = [
@@ -41,6 +53,12 @@ const FRASES: string[] = [
   "gordo de mierda",
   "mal parido",
   "mal parida",
+  "tu mama",
+  "tu vieja",
+  "tomatela",
+  "andate a la",
+  "que te cog",
+  "que lo cog",
 ];
 
 function normalizar(text: string): string {
