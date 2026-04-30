@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { appendReclamoToSheet } from "@/lib/google-sheets";
 import { buildSheetsDescription, buildStoredReclamoDescription } from "@/lib/reclamo-details";
+import { contieneInapropiado } from "@/lib/filtro-palabras";
 
 function getAdminClient() {
   return createClient<Database>(
@@ -32,6 +33,14 @@ export async function POST(request: NextRequest) {
       foto_base64,
       foto_mime,
     } = body;
+
+    const camposTexto = [descripcion, barrio].filter(Boolean).join(" ");
+    if (contieneInapropiado(camposTexto)) {
+      return NextResponse.json(
+        { error: "Tu reclamo contiene lenguaje inapropiado. Por favor revisá el texto y volvé a intentarlo." },
+        { status: 400 }
+      );
+    }
 
     const today = new Date().toISOString().slice(0, 10);
     const hasFutureBirthDate =
