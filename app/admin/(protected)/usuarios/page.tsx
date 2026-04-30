@@ -1,10 +1,12 @@
 import { requireRole } from "@/lib/security/auth";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import UsuariosClient from "./UsuariosClient";
 
 export default async function UsuariosPage() {
-  const { supabase, user, role } = await requireRole("admin");
+  const { user, role } = await requireRole("admin");
 
-  const { data: usuarios } = await supabase
+  const serviceClient = createServiceRoleClient();
+  const { data: usuarios } = await serviceClient
     .from("users")
     .select("*")
     .order("created_at", { ascending: false });
