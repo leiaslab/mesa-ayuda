@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       foto_mime,
     } = body;
 
-    const camposTexto = [descripcion, barrio, entre_calles].filter(Boolean).join(" ");
+    const camposTexto = [descripcion, barrio, entre_calles, nombre, apellido].filter(Boolean).join(" ");
     if (contieneInapropiado(camposTexto)) {
       return NextResponse.json(
         { error: "Tu reclamo contiene lenguaje inapropiado. Por favor revisá el texto y volvé a intentarlo." },
