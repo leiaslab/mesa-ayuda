@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import type { DocumentoGenerado, DocumentoTipo } from "@/types/database";
 
@@ -15,26 +15,18 @@ const TIPO_COLORS: Record<DocumentoTipo, string> = {
 };
 
 export default async function DocumentosPage() {
-  const supabase = await createClient();
+  const service = createServiceRoleClient();
 
-  const { data } = await supabase
+  const { data } = await service
     .from("documentos_generados")
     .select("*, reclamos(numero_seguimiento)")
     .order("created_at", { ascending: false })
     .limit(100);
 
-  const documentos = await Promise.all(
-    ((data ?? []) as (DocumentoGenerado & { reclamos: { numero_seguimiento: string } | null })[]).map(async (doc) => {
-      const signed = await supabase.storage
-        .from("documentos")
-        .createSignedUrl(doc.archivo_path, 60 * 60 * 24);
-
-      return {
-        ...doc,
-        download_url: signed.data?.signedUrl ?? doc.archivo_url,
-      };
-    })
-  );
+  const documentos = ((data ?? []) as (DocumentoGenerado & { reclamos: { numero_seguimiento: string } | null })[]).map((doc) => ({
+    ...doc,
+    download_url: doc.archivo_url,
+  }));
 
   type DocRow = DocumentoGenerado & {
     reclamos: { numero_seguimiento: string } | null;

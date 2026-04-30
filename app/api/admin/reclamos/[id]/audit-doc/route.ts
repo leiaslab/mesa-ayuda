@@ -6,6 +6,12 @@ import { createServiceRoleClient } from "@/lib/supabase/server";
 
 const TIPOS_VALIDOS = new Set(["pdf", "word", "excel"]);
 
+const EXTENSIONES: Record<string, string> = {
+  pdf: "pdf",
+  word: "docx",
+  excel: "xlsx",
+};
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -31,19 +37,33 @@ export async function POST(
     .eq("id", id)
     .single();
 
-  await createAuditLog({
-    userId: user.id,
-    accion: "documento_generado",
-    entidad: "reclamos",
-    entidadId: id,
-    detalle: {
-      tipo,
-      numero_seguimiento: reclamo?.numero_seguimiento ?? id,
-      admin_nombre: profile?.nombre ?? user.email,
-    },
-    ip: getClientIp(request),
-    userAgent: getUserAgent(request),
-  });
+  const nroSeg = reclamo?.numero_seguimiento ?? id;
+  const ext = EXTENSIONES[tipo];
+  const nombre_archivo = `Reclamo_${nroSeg}.${ext}`;
+
+  await Promise.all([
+    createAuditLog({
+      userId: user.id,
+      accion: "documento_generado",
+      entidad: "reclamos",
+      entidadId: id,
+      detalle: {
+        tipo,
+        numero_seguimiento: nroSeg,
+        admin_nombre: profile?.nombre ?? user.email,
+      },
+      ip: getClientIp(request),
+      userAgent: getUserAgent(request),
+    }),
+    service.from("documentos_generados").insert({
+      reclamo_id: id,
+      tipo_documento: tipo as "pdf" | "word" | "excel",
+      nombre_archivo,
+      archivo_url: `/admin/reclamos/${id}`,
+      archivo_path: `${tipo}/${nroSeg}`,
+      generado_por: user.id,
+    }),
+  ]);
 
   return NextResponse.json({ success: true });
 }
