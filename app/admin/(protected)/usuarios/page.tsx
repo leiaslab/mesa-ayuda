@@ -6,10 +6,9 @@ export default async function UsuariosPage() {
   const { user, role } = await requireRole("admin");
 
   const serviceClient = createServiceRoleClient();
-  const { data: usuarios } = await serviceClient
-    .from("users")
-    .select("*")
-    .order("created_at", { ascending: false });
+  let query = serviceClient.from("users").select("*").order("created_at", { ascending: false });
+  if (role !== "super_admin") query = query.eq("rol", "admin");
+  const { data: usuarios } = await query;
 
   return (
     <div className="space-y-5 p-4 md:p-6 lg:p-8">
